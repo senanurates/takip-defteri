@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Takip Defteri · Seni kim geri takip etmiyor?</title>
+<meta name="description" content="Instagram verini yükle; geri takip etmeyenleri, karşılıklı takipleri ve seni takipten çıkanları şifre vermeden gör. Veriler cihazından çıkmaz.">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta property="og:title" content="Takip Defteri">
+<meta property="og:description" content="Seni kim geri takip etmiyor? Şifre vermeden, verin cihazından çıkmadan öğren.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0a0f; --panel:rgba(255,255,255,.045); --panel-2:rgba(255,255,255,.07);
+    --line:rgba(255,255,255,.09); --text:#f4f2f7; --muted:#a29fb0; --dim:#6f6c7c;
+    --a1:#ff5f6d; --a2:#ff9a44; --a3:#b44cff; --ok:#3ddc97; --warn:#ffb648;
+    --grad:linear-gradient(120deg,var(--a3),var(--a1) 55%,var(--a2));
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;overflow-x:hidden}
+  .blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:.35;pointer-events:none;z-index:0}
+  .b1{width:520px;height:520px;background:var(--a3);top:-180px;left:-160px}
+  .b2{width:460px;height:460px;background:var(--a1);top:120px;right:-200px;opacity:.25}
+  .b3{width:420px;height:420px;background:var(--a2);bottom:-220px;left:30%;opacity:.18}
+  .wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:40px 20px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:56px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .logo{width:38px;height:38px;border-radius:12px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 30px rgba(255,95,109,.35)}
+  .pill{font-size:12.5px;color:var(--muted);border:1px solid var(--line);padding:7px 12px;border-radius:999px;display:flex;align-items:center;gap:7px;background:var(--panel)}
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.04;letter-spacing:-.035em;font-weight:800;max-width:760px}
+  h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);font-size:17px;line-height:1.6;max-width:620px;margin:18px 0 36px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(12px)}
+  .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+  .drop{padding:34px 28px;text-align:center;border:1.5px dashed rgba(255,255,255,.16);border-radius:var(--radius);cursor:pointer;transition:.2s;background:var(--panel);position:relative}
+  .drop:hover,.drop.over{border-color:var(--a1);background:rgba(255,95,109,.06)}
+  .drop .ic{width:58px;height:58px;margin:0 auto 16px;border-radius:16px;background:var(--panel-2);display:grid;place-items:center}
+  .drop h3{font-size:18px;font-weight:700;margin-bottom:6px}
+  .drop p{color:var(--muted);font-size:14px;line-height:1.5}
+  .drop input{display:none}
+  .btn{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:12px;padding:12px 18px;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:8px;color:var(--text);background:var(--panel-2);border:1px solid var(--line)}
+  .btn:hover{background:rgba(255,255,255,.12)}
+  .btn.primary{background:var(--grad);border:0;box-shadow:0 10px 30px rgba(255,95,109,.3)}
+  .btn.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+  .btn.ghost{background:transparent}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .mt{margin-top:18px}
+  .steps{padding:26px}
+  .steps h3{font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .steps ol{list-style:none;counter-reset:s;display:grid;gap:11px}
+  .steps li{counter-increment:s;display:flex;gap:12px;font-size:14px;color:#d6d3de;line-height:1.45}
+  .steps li::before{content:counter(s);flex:0 0 24px;height:24px;border-radius:8px;background:var(--panel-2);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--a2)}
+  .steps b{color:var(--text)}
+  .note{font-size:12.5px;color:var(--dim);margin-top:16px;line-height:1.5}
+  .err{margin-top:16px;padding:14px 16px;border-radius:14px;background:rgba(255,95,109,.1);border:1px solid rgba(255,95,109,.3);color:#ffc2c7;font-size:14px;line-height:1.5;display:none}
+  .loading{display:none;margin-top:18px;color:var(--muted);font-size:14px;align-items:center;gap:10px}
+  .spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--a1);animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* results */
+  #results{display:none}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .topbar h2{font-size:30px;letter-spacing:-.03em;font-weight:800}
+  .topbar p{color:var(--muted);font-size:14px;margin-top:6px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  @media(max-width:820px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{padding:20px}
+  .stat .k{font-size:12.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .stat .v{font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:8px}
+  .stat.hl{background:linear-gradient(140deg,rgba(180,76,255,.18),rgba(255,95,109,.14));border-color:rgba(255,95,109,.3)}
+  .stat .bar{height:5px;border-radius:5px;background:var(--panel-2);margin-top:12px;overflow:hidden}
+  .stat .bar i{display:block;height:100%;background:var(--grad);border-radius:5px}
+  .compare{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .compare .t{font-size:14px;color:#d6d3de;line-height:1.5;max-width:620px}
+  .compare .t b{color:var(--text)}
+  .tabs{display:flex;gap:6px;padding:6px;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:0;padding:10px 14px;border-radius:11px;cursor:pointer;white-space:nowrap;display:flex;gap:8px;align-items:center}
+  .tab:hover{color:var(--text)}
+  .tab.on{background:var(--panel-2);color:var(--text)}
+  .tab .c{font-size:12px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08)}
+  .tab.on .c{background:var(--grad)}
+  .listbox{margin-top:14px;overflow:hidden}
+  .tools{display:flex;gap:10px;padding:14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .search{flex:1;min-width:180px;position:relative}
+  .search input,.tools select{width:100%;font:inherit;font-size:14px;color:var(--text);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:11px;padding:10px 12px 10px 36px;outline:none}
+  .tools select{width:auto;padding-left:12px;cursor:pointer}
+  .search input:focus{border-color:rgba(255,95,109,.5)}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.5}
+  .desc{padding:14px 18px 4px;color:var(--muted);font-size:13.5px;line-height:1.5}
+  ul.list{list-style:none;max-height:560px;overflow-y:auto}
+  ul.list li{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
+  ul.list li:hover{background:rgba(255,255,255,.03)}
+  .av{width:40px;height:40px;border-radius:50%;flex:0 0 40px;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff;text-transform:uppercase}
+  .who{flex:1;min-width:0}
+  .who .u{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .who .d{font-size:12.5px;color:var(--dim);margin-top:2px}
+  .open{font-size:13px;font-weight:600;color:var(--a2);text-decoration:none;padding:7px 11px;border-radius:9px;border:1px solid var(--line);white-space:nowrap}
+  .open:hover{background:var(--panel-2)}
+  .empty{padding:50px 20px;text-align:center;color:var(--muted);font-size:14.5px;line-height:1.6}
+  .empty .big{font-size:34px;margin-bottom:10px}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,30px);background:#1d1b25;border:1px solid var(--line);color:var(--text);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.25s;z-index:10;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .modal{position:fixed;inset:0;background:rgba(5,5,10,.7);backdrop-filter:blur(6px);display:none;place-items:center;z-index:9;padding:20px}
+  .modal.show{display:grid}
+  .modal .card{max-width:460px;width:100%;padding:26px;background:#15131c}
+  .modal h3{font-size:19px;margin-bottom:8px}
+  .modal p{color:var(--muted);font-size:14px;line-height:1.55;margin-bottom:18px}
+  footer{margin-top:60px;text-align:center;color:var(--dim);font-size:12.5px;line-height:1.7}
+  .flinks{display:flex;gap:10px;justify-content:center;margin-bottom:10px;font-size:13.5px}
+  .flinks a{color:var(--muted);text-decoration:none;font-weight:600}
+  .flinks a:hover{color:var(--text)}
+  .faq{margin-top:56px}
+  .faq h2{font-size:26px;letter-spacing:-.03em;font-weight:800;margin-bottom:18px}
+  .faq details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+  .faq summary{cursor:pointer;font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:"+";color:var(--a2);font-size:20px;line-height:1}
+  .faq details[open] summary::after{content:"–"}
+  .faq details p{color:var(--muted);font-size:14.5px;line-height:1.6;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg width="38" height="38" viewBox="0 0 100 100" aria-hidden="true"><path d="M21 29h20M31 29v42" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/><path d="M55 29h4a21 21 0 0 1 0 42h-4z" fill="none" stroke="#fff" stroke-width="10" stroke-linejoin="round"/></svg>
+      </div>
+      Takip Defteri
+    </div>
+    <div class="pill"><i></i>Veriler cihazından çıkmaz</div>
+  </header>
+
+  <!-- UPLOAD VIEW -->
+  <section id="upload">
+    <h1>Seni kim <span>geri takip etmiyor?</span></h1>
+    <p class="lead">Instagram'dan indirdiğin veri dosyasını yükle. Geri takip etmeyenleri, karşılıklı takipleşmeleri ve iki tarih arasında seni takipten çıkanları anında gör. Şifre istemez, hiçbir sunucuya veri göndermez.</p>
+
+    <div class="grid2">
+      <div>
+        <label class="drop" id="drop">
+          <input type="file" id="file" multiple accept=".zip,.json,.html">
+          <div class="ic">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="url(#g)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#b44cff"/><stop offset="1" stop-color="#ff9a44"/></linearGradient></defs><path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/></svg>
+          </div>
+          <h3>ZIP dosyasını buraya bırak</h3>
+          <p>ya da seçmek için tıkla<br><span style="color:var(--dim);font-size:13px">.zip, followers_1.json + following.json veya HTML</span></p>
+        </label>
+        <div class="row mt">
+          <button class="btn ghost sm" id="demo">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            Örnek verilerle dene
+          </button>
+        </div>
+        <div class="loading" id="loading"><div class="spin"></div><span>Dosya okunuyor…</span></div>
+        <div class="err" id="err"></div>
+      </div>
+
+      <div class="card steps">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9a44" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Verini nasıl indirirsin?
+        </h3>
+        <ol>
+          <li><span>Instagram'da <b>Profil → ☰ menü → Hesap Merkezi</b>'ne gir.</span></li>
+          <li><span><b>Bilgilerin ve izinlerin → Bilgilerini dışa aktar</b> seçeneğini aç.</span></li>
+          <li><span><b>Dışa aktarma oluştur → Cihaza aktar</b>'ı seç.</span></li>
+          <li><span>"Bilgileri özelleştir"de yalnızca <b>Takipçiler ve takip edilenler</b>'i işaretle.</span></li>
+          <li><span>Tarih aralığı: <b>Tüm zamanlar</b>, biçim: <b>JSON</b>.</span></li>
+          <li><span>Hazır olunca gelen e-postadaki ZIP'i indirip buraya yükle.</span></li>
+        </ol>
+        <p class="note">Dosyanın hazırlanması birkaç dakika ile birkaç saat sürebilir. Menü adları uygulama sürümüne göre biraz farklı olabilir.</p>
+      </div>
+    </div>
+
+    <div class="faq" id="sss">
+      <h2>Sık sorulanlar</h2>
+      <details><summary>Şifremi veriyor muyum?</summary><p>Hayır. Takip Defteri hiçbir zaman Instagram şifreni ya da hesabına giriş yapmanı istemez. Sadece Instagram'ın sana verdiği veri dosyasını kullanır.</p></details>
+      <details><summary>Verilerim bir yere gönderiliyor mu?</summary><p>Hayır. Dosya tamamen tarayıcında okunur ve analiz edilir. "Bu durumu kaydet" dediğinde takipçi listen yalnızca bu tarayıcının yerel depolamasına kaydedilir, istediğin an silebilirsin.</p></details>
+      <details><summary>Profilime kimin baktığını gösterebilir mi?</summary><p>Hayır, hiçbir uygulama gösteremez. Instagram bu bilgiyi kimseyle paylaşmıyor. Bunu vaat eden uygulamalar ya uydurma liste gösterir ya da şifreni çalmaya çalışır.</p></details>
+      <details><summary>Takipten çıkanları nasıl görürüm?</summary><p>İki farklı tarihteki veriyi karşılaştırman gerekir. Bugün dosyanı yükleyip "Bu durumu kaydet" de; birkaç hafta sonra yeni dosyanı yüklediğinde aradaki fark otomatik gösterilir. Elinde eski bir dosya varsa onu da yükleyebilirsin.</p></details>
+      <details><summary>Listede hesabını kapatmış kişiler de çıkıyor, neden?</summary><p>Hesabını silen ya da donduran kişiler de takipçi listenden düştüğü için "takipten çıkanlar" arasında görünebilir. Emin olmak için "Profili aç" ile kontrol edebilirsin.</p></details>
+      <details><summary>Ücretli mi?</summary><p>Hayır, tamamen ücretsiz.</p></details>
+    </div>
+  </section>
+
+  <!-- RESULTS VIEW -->
+  <section id="results">
+    <div class="topbar">
+      <div>
+        <h2>Analiz sonuçları</h2>
+        <p id="meta"></p>
+      </div>
+      <div class="row">
+        <button class="btn sm" id="saveSnap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Bu durumu kaydet
+        </button>
+        <button class="btn sm" id="reset">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          Yeni dosya
+        </button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card stat"><div class="k">Takipçi</div><div class="v" id="sFollowers">0</div></div>
+      <div class="card stat"><div class="k">Takip edilen</div><div class="v" id="sFollowing">0</div></div>
+      <div class="card stat hl"><div class="k">Geri takip etmeyen</div><div class="v" id="sNotBack">0</div><div class="bar"><i id="barNotBack"></i></div></div>
+      <div class="card stat"><div class="k">Karşılıklı</div><div class="v" id="sMutual">0</div><div class="bar"><i id="barMutual"></i></div></div>
+    </div>
+
+    <div class="card compare" id="compareBox">
+      <div class="t" id="compareText"></div>
+      <div class="row">
+        <label class="btn sm" for="oldFile">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/></svg>
+          Eski veri yükle
+        </label>
+        <input type="file" id="oldFile" multiple accept=".zip,.json,.html" style="display:none">
+        <button class="btn sm ghost" id="clearSnap" style="display:none">Kaydı sil</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="tabs"></div>
+    </div>
+
+    <div class="card listbox">
+      <div class="desc" id="tabDesc"></div>
+      <div class="tools">
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" placeholder="Kullanıcı adı ara…" autocomplete="off">
+        </div>
+        <select id="sort">
+          <option value="new">En yeni önce</option>
+          <option value="old">En eski önce</option>
+          <option value="az">A → Z</option>
+        </select>
+        <button class="btn sm" id="copy">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Listeyi kopyala
+        </button>
+      </div>
+      <ul class="list" id="list"></ul>
+    </div>
+  </section>
+
+  <footer>
+    <div class="flinks"><a href="gizlilik.html">Gizlilik politikası</a><span>·</span><a href="#sss" id="faqLink">Sık sorulanlar</a><span>·</span><a href="mailto:takipdefteri.destek@gmail.com">İletişim</a></div>
+    takipdefteri.destek@gmail.com<br>
+    Dosyalar yalnızca tarayıcında işlenir; hiçbir sunucuya gönderilmez.<br>
+    Takip Defteri, Instagram veya Meta Platforms, Inc. ile bağlantılı değildir; onlar tarafından onaylanmamıştır.<br>
+    Instagram, Meta Platforms, Inc.'nin ticari markasıdır.<br>
+    © 2026 Takip Defteri
+  </footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn sm" id="mCancel">Vazgeç</button>
+      <button class="btn sm primary" id="mOk">Tamam</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const SNAP_KEY = 'takip-analizi-snapshot-v1';
+  const $ = id => document.getElementById(id);
+
+  const state = { cur: null, prev: null, prevLabel: '', tab: 'notBack', isDemo: false };
+
+  /* ---------- Parsing ---------- */
+  function userFromHref(h) {
+    const m = (h || '').match(/instagram\.com\/(?:_u\/)?([A-Za-z0-9._]+)/i);
+    return m ? m[1] : '';
+  }
+  function norm(u) { return (u || '').trim().replace(/^@/, '').toLowerCase(); }
+
+  function entriesFromJson(json) {
+    const out = [];
+    (function walk(n) {
+      if (Array.isArray(n)) { n.forEach(walk); return; }
+      if (n && typeof n === 'object') {
+        if (Array.isArray(n.string_list_data)) {
+          const s = n.string_list_data[0] || {};
+          const href = s.href || '';
+          const u = norm(s.value || n.title || userFromHref(href));
+          if (u) out.push({ u, ts: s.timestamp || 0 });
+          return;
+        }
+        Object.values(n).forEach(walk);
+      }
+    })(json);
+    return out;
+  }
+
+  function entriesFromHtml(text) {
+    const out = [], seen = new Set();
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    doc.querySelectorAll('a[href*="instagram.com"]').forEach(a => {
+      const u = norm(userFromHref(a.getAttribute('href')));
+      if (!u || seen.has(u)) return;
+      seen.add(u);
+      // try to find date near the link
+      let ts = 0;
+      const block = a.closest('div');
+      if (block) {
+        const t = Date.parse(block.textContent.replace(a.textContent, '').trim());
+        if (!isNaN(t)) ts = Math.floor(t / 1000);
+      }
+      out.push({ u, ts });
+    });
+    return out;
+  }
+
+  function classify(path) {
+    const name = path.split('/').pop().toLowerCase();
+    if (/^followers(_\d+)?\.(json|html)$/.test(name)) return 'followers';
+    if (/^following\.(json|html)$/.test(name)) return 'following';
+    return null;
+  }
+
+  async function parseFiles(files) {
+    const res = { followers: new Map(), following: new Map(), latestTs: 0 };
+    const add = (kind, path, text) => {
+      let list;
+      if (path.toLowerCase().endsWith('.json')) {
+        try { list = entriesFromJson(JSON.parse(text)); } catch { list = []; }
+      } else list = entriesFromHtml(text);
+      list.forEach(e => {
+        res[kind].set(e.u, e);
+        if (e.ts > res.latestTs) res.latestTs = e.ts;
+      });
+    };
+    for (const f of files) {
+      const lower = f.name.toLowerCase();
+      if (lower.endsWith('.zip')) {
+        if (typeof JSZip === 'undefined') throw new Error('ZIP okuyucu yüklenemedi. ZIP\'i açıp içindeki JSON dosyalarını yüklemeyi dene.');
+        const zip = await JSZip.loadAsync(f);
+        const jobs = [];
+        zip.forEach((path, entry) => {
+          const kind = classify(path);
+          if (kind && !entry.dir) jobs.push(entry.async('string').then(t => add(kind, path, t)));
+        });
+        await Promise.all(jobs);
+      } else {
+        const kind = classify(f.name);
+        if (kind) add(kind, f.name, await f.text());
+      }
+    }
+    return res;
+  }
+
+  /* ---------- Snapshot ---------- */
+  function loadSnap() {
+    try { const s = JSON.parse(localStorage.getItem(SNAP_KEY)); return s && Array.isArray(s.followers) ? s : null; }
+    catch { return null; }
+  }
+  function saveSnap(cur) {
+    try {
+      localStorage.setItem(SNAP_KEY, JSON.stringify({ date: Date.now(), followers: [...cur.followers.values()] }));
+      return true;
+    } catch { return false; }
+  }
+  function clearSnap() { try { localStorage.removeItem(SNAP_KEY); } catch {} }
+
+  /* ---------- Helpers ---------- */
+  const fmtDate = ts => ts ? new Date(ts * 1000).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const fmtN = n => n.toLocaleString('tr-TR');
+  function hue(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return h; }
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+  function confirmBox(title, text, okLabel) {
+    return new Promise(res => {
+      $('mTitle').textContent = title; $('mText').textContent = text; $('mOk').textContent = okLabel || 'Tamam';
+      $('modal').classList.add('show');
+      const done = v => { $('modal').classList.remove('show'); $('mOk').onclick = $('mCancel').onclick = null; res(v); };
+      $('mOk').onclick = () => done(true); $('mCancel').onclick = () => done(false);
+    });
+  }
+  function showErr(msg) { const e = $('err'); e.innerHTML = msg; e.style.display = msg ? 'block' : 'none'; }
+  function setLoading(on) { $('loading').style.display = on ? 'flex' : 'none'; }
+
+  /* ---------- Compute ---------- */
+  function lists() {
+    const { followers, following } = state.cur;
+    const notBack = [], fans = [], mutual = [];
+    following.forEach((e, u) => (followers.has(u) ? mutual : notBack).push(e));
+    followers.forEach((e, u) => { if (!following.has(u)) fans.push(e); });
+    let lost = null, gained = null;
+    if (state.prev) {
+      lost = []; gained = [];
+      state.prev.forEach((e, u) => { if (!followers.has(u)) lost.push(e); });
+      followers.forEach((e, u) => { if (!state.prev.has(u)) gained.push(e); });
+    }
+    return { notBack, fans, mutual, lost, gained };
+  }
+
+  const TABS = [
+    { id: 'notBack', label: 'Geri takip etmeyenler', desc: 'Senin takip ettiğin ama seni takip etmeyen hesaplar. Tarih, senin onları takip etmeye başladığın günü gösterir.' },
+    { id: 'fans', label: 'Takip etmediklerin', desc: 'Seni takip eden ama senin takip etmediğin hesaplar. Tarih, seni takip etmeye başladıkları günü gösterir.' },
+    { id: 'mutual', label: 'Karşılıklı', desc: 'Birbirinizi takip ettiğiniz hesaplar.' },
+    { id: 'lost', label: 'Takipten çıkanlar', desc: 'Önceki veride takipçin olup şimdi olmayan hesaplar. Bu listede hesabını kapatan veya dondurulan kişiler de görünebilir.', needsPrev: true },
+    { id: 'gained', label: 'Yeni takipçiler', desc: 'Önceki veriden sonra seni takip etmeye başlayan hesaplar.', needsPrev: true }
+  ];
+
+  /* ---------- Render ---------- */
+  function render() {
+    const L = lists();
+    const { followers, following } = state.cur;
+    $('sFollowers').textContent = fmtN(followers.size);
+    $('sFollowing').textContent = fmtN(following.size);
+    $('sNotBack').textContent = fmtN(L.notBack.length);
+    $('sMutual').textContent = fmtN(L.mutual.length);
+    const fs = Math.max(following.size, 1);
+    $('barNotBack').style.width = (L.notBack.length / fs * 100) + '%';
+    $('barMutual').style.width = (L.mutual.length / fs * 100) + '%';
+
+    $('meta').textContent = state.isDemo
+      ? 'Örnek veri gösteriliyor'
+      : (state.cur.latestTs ? `Verideki en son hareket: ${fmtDate(state.cur.latestTs)}` : 'Dosya analiz edildi');
+
+    // compare box
+    if (state.prev) {
+      $('compareText').innerHTML = `Karşılaştırma: <b>${state.prevLabel}</b> verisiyle. <b>${fmtN(L.lost.length)}</b> kişi takipten çıkmış, <b>${fmtN(L.gained.length)}</b> yeni takipçi gelmiş.`;
+    } else {
+      $('compareText').innerHTML = `<b>Takipten çıkanları görmek için iki veri gerekir.</b> Şimdi "Bu durumu kaydet" de, birkaç hafta sonra yeni dosyayı yüklediğinde fark otomatik çıkar. Elinde eski bir ZIP varsa onu da hemen yükleyebilirsin.`;
+    }
+    $('clearSnap').style.display = loadSnap() ? '' : 'none';
+
+    // tabs
+    $('tabs').innerHTML = TABS.map(t => {
+      const arr = L[t.id];
+      const c = arr ? fmtN(arr.length) : '—';
+      return `<button class="tab ${state.tab === t.id ? 'on' : ''}" data-t="${t.id}">${t.label}<span class="c">${c}</span></button>`;
+    }).join('');
+    $('tabs').querySelectorAll('.tab').forEach(b => b.onclick = () => { state.tab = b.dataset.t; render(); });
+
+    renderList(L);
+  }
+
+  function currentItems(L) {
+    const arr = (L || lists())[state.tab];
+    if (!arr) return null;
+    const q = norm($('q').value);
+    let items = q ? arr.filter(e => e.u.includes(q)) : arr.slice();
+    const s = $('sort').value;
+    if (s === 'az') items.sort((a, b) => a.u.localeCompare(b.u, 'tr'));
+    else if (s === 'old') items.sort((a, b) => (a.ts || Infinity) - (b.ts || Infinity));
+    else items.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    return items;
+  }
+
+  function renderList(L) {
+    const tab = TABS.find(t => t.id === state.tab);
+    $('tabDesc').textContent = tab.desc;
+    const items = currentItems(L);
+    const ul = $('list');
+    if (!items) {
+      ul.innerHTML = `<li class="empty" style="display:block"><div class="big">🕰️</div>Bu liste için karşılaştırılacak bir önceki veri yok.<br>Yukarıdan eski bir dosya yükle ya da bugünkü durumu kaydet.</li>`;
+      return;
+    }
+    if (!items.length) {
+      ul.innerHTML = `<li class="empty" style="display:block"><div class="big">✨</div>${$('q').value ? 'Aramanla eşleşen hesap yok.' : 'Bu listede kimse yok.'}</li>`;
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    items.slice(0, 3000).forEach(e => {
+      const li = document.createElement('li');
+      const h = hue(e.u);
+      li.innerHTML = `
+        <div class="av" style="background:linear-gradient(135deg,hsl(${h} 75% 55%),hsl(${(h + 50) % 360} 80% 50%))"></div>
+        <div class="who"><div class="u"></div><div class="d"></div></div>
+        <a class="open" target="_blank" rel="noopener">Profili aç ↗</a>`;
+      li.querySelector('.av').textContent = e.u.replace(/[^a-z0-9]/g, '')[0] || '•';
+      li.querySelector('.u').textContent = '@' + e.u;
+      li.querySelector('.d').textContent = e.ts ? fmtDate(e.ts) : 'Tarih bilgisi yok';
+      li.querySelector('.open').href = 'https://www.instagram.com/' + encodeURIComponent(e.u) + '/';
+      frag.appendChild(li);
+    });
+    ul.innerHTML = '';
+    ul.appendChild(frag);
+    if (items.length > 3000) {
+      const li = document.createElement('li');
+      li.className = 'empty'; li.style.display = 'block';
+      li.textContent = `İlk 3000 hesap gösteriliyor. Daraltmak için arama kullan.`;
+      ul.appendChild(li);
+    }
+  }
+
+  /* ---------- Flow ---------- */
+  function showResults() {
+    $('upload').style.display = 'none';
+    $('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    render();
+  }
+
+  async function handleMain(files) {
+    showErr(''); setLoading(true);
+    try {
+      const res = await parseFiles(files);
+      if (!res.followers.size && !res.following.size) {
+        showErr('Dosyada takipçi veya takip listesi bulunamadı. Dışa aktarırken <b>"Takipçiler ve takip edilenler"</b> bölümünü seçtiğinden emin ol. ZIP içinde <code>followers_1.json</code> ve <code>following.json</code> olmalı.');
+        return;
+      }
+      if (!res.followers.size || !res.following.size) {
+        showErr(`Yalnızca ${res.followers.size ? 'takipçi' : 'takip edilen'} listesi bulundu. Diğer dosyayı da birlikte yüklersen sonuçlar tam olur.`);
+      }
+      state.cur = res; state.isDemo = false; state.tab = 'notBack';
+      const snap = loadSnap();
+      if (snap) {
+        state.prev = new Map(snap.followers.map(e => [e.u, e]));
+        state.prevLabel = new Date(snap.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) + ' tarihli kayıt';
+      } else { state.prev = null; }
+      showResults();
+    } catch (e) {
+      showErr('Dosya okunamadı: ' + (e.message || e));
+    } finally { setLoading(false); }
+  }
+
+  async function handleOld(files) {
+    try {
+      const res = await parseFiles(files);
+      if (!res.followers.size) { toast('Eski dosyada takipçi listesi bulunamadı'); return; }
+      state.prev = res.followers;
+      state.prevLabel = res.latestTs ? fmtDate(res.latestTs) + ' civarındaki' : 'yüklediğin eski';
+      state.tab = 'lost';
+      render();
+      toast('Eski veriyle karşılaştırıldı');
+    } catch (e) { toast('Eski dosya okunamadı'); }
+  }
+
+  function demo() {
+    const names = ['deniz.ylmz','ece_karaca','mert.aksoy','zeynep.art','burak_dev','elif.sun','kaan.photo','selin.reads','arda.fit','ceren_cooks','onur.travels','ipek.design','emre.codes','naz.music','berk_ozturk','irem.lens','yigit.run','asli.studio','tuna.film','duru.nature','cem.bikes','melis.ink','kerem_ui','lara.dance','baris.chess','sude.plant','efe.games','nil.coffee','umut.space','ada.books'];
+    const now = Math.floor(Date.now() / 1000), day = 86400;
+    const mk = (u, i) => ({ u, ts: now - (i * 13 + 3) * day });
+    const followers = new Map(), following = new Map(), prev = new Map();
+    names.forEach((u, i) => {
+      if (i % 4 !== 0) followers.set(u, mk(u, i));
+      if (i % 3 !== 1) following.set(u, mk(u, i + 2));
+      if (i % 4 !== 0 || i % 8 === 0) prev.set(u, mk(u, i));
+    });
+    ['eski.dost','kayip.hesap'].forEach((u, i) => prev.set(u, mk(u, 40 + i)));
+    followers.delete('melis.ink'); followers.delete('kaan.photo');
+    state.cur = { followers, following, latestTs: now - 3 * day };
+    state.prev = prev; state.prevLabel = '1 ay önceki örnek';
+    state.isDemo = true; state.tab = 'notBack';
+    showResults();
+  }
+
+  /* ---------- Events ---------- */
+  const drop = $('drop');
+  $('file').onchange = e => { if (e.target.files.length) handleMain([...e.target.files]); e.target.value = ''; };
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleMain([...e.dataTransfer.files]); });
+  $('demo').onclick = demo;
+  $('oldFile').onchange = e => { if (e.target.files.length) handleOld([...e.target.files]); e.target.value = ''; };
+  $('q').oninput = () => renderList();
+  $('sort').onchange = () => renderList();
+
+  $('copy').onclick = async () => {
+    const items = currentItems();
+    if (!items || !items.length) { toast('Kopyalanacak hesap yok'); return; }
+    try { await navigator.clipboard.writeText(items.map(e => '@' + e.u).join('\n')); toast(`${items.length} kullanıcı adı kopyalandı`); }
+    catch { toast('Kopyalama bu tarayıcıda engellendi'); }
+  };
+
+  $('saveSnap').onclick = async () => {
+    if (state.isDemo) { toast('Örnek veri kaydedilmez'); return; }
+    if (loadSnap()) {
+      const ok = await confirmBox('Kaydın üzerine yazılsın mı?', 'Daha önce kaydettiğin bir durum var. Bugünkü takipçi listen onun yerine kaydedilecek.', 'Üzerine yaz');
+      if (!ok) return;
+    }
+    if (saveSnap(state.cur)) { toast('Kaydedildi. Bir dahaki yüklemede fark gösterilecek.'); render(); }
+    else toast('Bu tarayıcı kayıt yapmaya izin vermiyor');
+  };
+  $('clearSnap').onclick = async () => {
+    const ok = await confirmBox('Kayıt silinsin mi?', 'Bu tarayıcıda kayıtlı önceki takipçi listesi silinecek.', 'Sil');
+    if (ok) { clearSnap(); toast('Kayıt silindi'); render(); }
+  };
+  $('faqLink').onclick = e => {
+    if ($('results').style.display === 'block') {
+      e.preventDefault();
+      $('reset').click();
+      setTimeout(() => $('sss').scrollIntoView({ behavior: 'smooth' }), 50);
+    }
+  };
+  $('reset').onclick = () => {
+    $('results').style.display = 'none'; $('upload').style.display = 'block';
+    $('q').value = ''; showErr(''); state.cur = null;
+  };
+})();
+</script>
+</body>
+</html>
